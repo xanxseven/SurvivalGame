@@ -222,7 +222,7 @@ export default class World {
   beginAction(eid: number) {
     const itemId = C_Weilds.itemId[eid];
     const item = Items[itemId];
-    this.server.world.sweepAttack(eid, C_Position.x[eid], C_Position.y[eid], item.meeleDamage, item.meeleRange, C_Rotation.rotation[eid] + Math.PI * .5, Math.PI * .5);
+    this.server.world.sweepAttack(eid, C_Position.x[eid], C_Position.y[eid], item.meeleDamage, item.meeleRange, C_Rotation.rotation[eid], Math.PI * .5);
   }
 
   changeEntityItem(eid: number, itemId: number) {
@@ -257,10 +257,10 @@ export default class World {
   }
   //#endregion
 
-  get_angle_difference(a1: number, a2: number) {
-    var max = Math.PI * 2;
-    var diff = (a2 - a1) % max;
-    return 2 * diff % max - diff;
+  get_angle_difference(a0: number, a1: number) {
+    var max = Math.PI*2;
+    var da = (a1 - a0) % max;
+    return Math.abs(2*da % max - da);
   }
 
   queryRect(minx: number, miny: number, maxx: number, maxy: number, mask = 0xffff) {
@@ -326,8 +326,11 @@ export default class World {
       if (distSqrd - (sepperationOffset * sepperationOffset) > range * range) continue;
       if (dealer === body.eid) continue;
 
-      const angle = Math.atan2(body.position[1] - y, body.position[0] - x);
+      const dx = body.position[0] - x;
+      const dy = body.position[1] - y;
+      const angle = Math.atan2(dy, dx);
       const angleDif = this.get_angle_difference(startAngle, angle);
+
       if (angleDif > sweepAngle) continue;
 
       const targetEid = body.eid;
@@ -380,7 +383,7 @@ export default class World {
       }
     }
 
-    return leaderboard.splice(0, Math.min(leaderboard.length, MAX))
+    return leaderboard;
   }
 
   //#region Updating the world

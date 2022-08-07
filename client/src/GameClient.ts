@@ -242,9 +242,12 @@ export function gameClient_addEntity(now: number, eid: number, type: number, x: 
 export function GameClient_tryHit() {
 }
 
+function mouseToRot(ang: number){
+  return ang;
+}
 export function GameClient_mouseDown() {
   outStream.writeU8(CLIENT_HEADER.MOUSE_DOWN);
-  outStream.writeF32(mouse);
+  outStream.writeF32(getMouseState());
   flushStream();
 }
 

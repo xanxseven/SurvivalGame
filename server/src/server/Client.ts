@@ -7,6 +7,7 @@ import { ITEM, Items } from "../../../shared/Item";
 import EntityIdManager from "../../../shared/lib/EntityIDManager";
 import { networkTypes, types } from "../../../shared/EntityTypes";
 import { resetHealth } from "../Game/health";
+import {modulo} from "../../../shared/Utilts";
 
 const TMP_ENTITY_MANAGER: Map<number, boolean> = new Map();
 
@@ -141,11 +142,11 @@ export class Client {
           this.onInput();
           break;
         case CLIENT_HEADER.MOUSE_UP: {
-          if(this.eid !== -1) C_Mouse.mouseDown[this.eid] = +false;
+          if (this.eid !== -1) C_Mouse.mouseDown[this.eid] = +false;
           break;
         }
         case CLIENT_HEADER.MOUSE_DOWN: {
-          const angle = inStream.readF32();
+          const angle = modulo(inStream.readF32(), Math.PI * 2);
           if (this.eid !== -1) {
             C_Mouse.mouseDown[this.eid] = +true;
             this.server.world.setBodyRotation(this.eid, angle);
@@ -154,6 +155,8 @@ export class Client {
           }
           break;
         }
+        default:
+          throw "u" + header;
       }
     }
   }
@@ -171,7 +174,7 @@ export class Client {
 
   onInput() {
     const keyState = this.inStream.readU8();
-    const mouseRotation = this.inStream.readF32();
+    const mouseRotation = modulo(this.inStream.readF32(), Math.PI * 2);
 
     let x = 0;
     let y = 0;
