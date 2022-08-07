@@ -386,8 +386,8 @@ export default class World {
   //#region Updating the world
   update(delta: number) {
 
-    console.log("===================");
-    const debug = true;
+    const debug = false;
+    debug && console.log("===================");
     const start = Date.now();
     this.isUpdating = true;
 
@@ -568,9 +568,9 @@ export default class World {
       this.addEntity(tree);
     }
 
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 1; i++) {
       const wolf = this.createWolf();
-      this.setBodyPosition(wolf, Math.random() * spread, Math.random() * spread);
+      this.setBodyPosition(wolf, Math.random() * 500, Math.random() * 500);
       this.addEntity(wolf);
     }
   }

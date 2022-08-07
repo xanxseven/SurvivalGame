@@ -27,12 +27,23 @@ export function tickHostile(world: World, eid: number, delta: number) {
 
   switch (state) {
     case MOB_STATE.IDLE:
-      C_Controls.x[eid] = 1;
       C_Controls.vel[eid] = 10;
       break;
   }
 }
 
+export function setMobState(eid: number, state: number, stateTimer: number) {
+  C_Mob.state[eid] = state;
+  C_Mob.stateTimer[eid] = stateTimer;
+}
+
+export function resetMobMovement(eid: number) {
+  C_Controls.x[eid] = 0;
+  C_Controls.y[eid] = 0;
+}
+
+const viewDistance = 500;
+const chaseViewDistance = viewDistance * 1.1;
 export function tickPassive(world: World, eid: number, delta: number) {
   const state = C_Mob.state[eid];
 
@@ -56,7 +67,7 @@ export function tickPassive(world: World, eid: number, delta: number) {
 
       const distSqrd = dx ** 2 + dy ** 2;
 
-      if (distSqrd >= (500 ** 2)) {
+      if (distSqrd >= (chaseViewDistance * chaseViewDistance)) {
         C_Mob.stateTimer[eid] = 0; // we will request to go into next state
         break;
       }
@@ -75,19 +86,15 @@ export function tickPassive(world: World, eid: number, delta: number) {
     case MOB_STATE.IDLE_WALK:
       C_Mob.stateTimer[eid] -= delta;
       if (C_Mob.stateTimer[eid] <= 0) {
-        C_Mob.stateTimer[eid] = 500;
-        C_Mob.state[eid] = MOB_STATE.IDLE;
-        C_Controls.x[eid] = 0;
-        C_Controls.y[eid] = 0;
+        setMobState(eid, MOB_STATE.IDLE, 500);
+        resetMobMovement(eid);
       }
       break;
     case MOB_STATE.CHASE_ENTITY:
       // dont decrease timer while chasing, since once entity leave activation range, it will set state timer to 0
       if (C_Mob.stateTimer[eid] <= 0) {
-        C_Mob.state[eid] = MOB_STATE.IDLE;
-        C_Mob.stateTimer[eid] = 300;
-        C_Controls.x[eid] = 0;
-        C_Controls.y[eid] = 0;
+        setMobState(eid, MOB_STATE.IDLE, 300);
+        resetMobMovement(eid);
       }
       break;
     case MOB_STATE.SEARCH_ENTITY:
@@ -104,39 +111,38 @@ export function tickPassive(world: World, eid: number, delta: number) {
       }
 
       if (playersFound.length) {
-        let nearestPlayer = playersFound[0];
+        let nearestPlayer = -1;
         let nearestDist = Infinity;
         for (let i = 0; i < playersFound.length; i++) {
           const theirEid = playersFound[i];
           const theirX = C_Position.x[theirEid];
-          const theirY = C_Position.x[theirEid];
+          const theirY = C_Position.y[theirEid];
           const distSqrd = (x - theirX) ** 2 + (y - theirY) ** 2;
-          if (distSqrd < nearestDist) {
+          if (distSqrd < nearestDist && distSqrd <= (viewDistance * viewDistance)) {
             nearestDist = distSqrd;
             nearestPlayer = theirEid;
           }
         }
 
-        C_Mob.stateTimer[eid] = 300;
-        C_Mob.state[eid] = MOB_STATE.CHASE_ENTITY;
-        C_Mob.targetEid[eid] = nearestPlayer;
+        if (nearestPlayer == -1) {
+          setMobState(eid, MOB_STATE.IDLE_WALK, 3000);
+        } else {
+          setMobState(eid, MOB_STATE.CHASE_ENTITY, 300);
+          C_Mob.targetEid[eid] = nearestPlayer;
+        }
       } else {
-        C_Mob.stateTimer[eid] = 300;
-        C_Mob.state[eid] = MOB_STATE.IDLE_WALK;
+        setMobState(eid, MOB_STATE.IDLE_WALK, 3000);
       }
       break;
     case MOB_STATE.IDLE:
       C_Mob.stateTimer[eid] -= delta;
       if (C_Mob.stateTimer[eid] <= 0) {
-        C_Mob.stateTimer[eid] = 4000;
-        C_Mob.state[eid] = MOB_STATE.SEARCH_ENTITY;
-
         const angle = Math.random() * Math.PI * 2;
         C_Rotation.rotation[eid] = angle;
         C_Controls.x[eid] = Math.cos(angle);
         C_Controls.y[eid] = Math.sin(angle);
         C_Controls.vel[eid] = 0.7;
-        C_Mob.timer[eid] = 3000;
+        setMobState(eid, MOB_STATE.SEARCH_ENTITY, 4000);
       }
       break;
   }
