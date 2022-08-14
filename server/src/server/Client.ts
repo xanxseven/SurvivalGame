@@ -175,7 +175,7 @@ export class Client {
   onInput() {
     const keyState = this.inStream.readU8();
     const mouseRotation = modulo(this.inStream.readF32(), Math.PI * 2);
-
+    
     let x = 0;
     let y = 0;
     if (keyState & 1) y--;
