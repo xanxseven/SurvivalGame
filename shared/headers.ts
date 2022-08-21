@@ -12,6 +12,7 @@ export const SERVER_HEADER = {
   INVENTORY: 10,
   UPDATE_HEALTH: 11,
   LEADERBOARD: 12,
+  HEALTH: 13
 }
 
 export const CLIENT_HEADER = {
@@ -19,4 +20,5 @@ export const CLIENT_HEADER = {
   INPUT: 1,
   MOUSE_DOWN: 2,
   MOUSE_UP: 3,
+  INVENTORY: 4,
 }

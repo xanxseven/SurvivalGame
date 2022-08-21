@@ -141,20 +141,6 @@ export default class GameServer {
     initClient.flushStream();
   }
 
-  sendHealth(eid: number, newHealth: number) {
-    const clients = this.clients.array;
-    for (let i = 0; i < clients.length; i++) {
-      const client = clients[i];
-      if (!client.ready) continue;
-      if (!client.visibleEntities.has(eid)) continue;
-
-      const stream = client.stream;
-      stream.writeU8(SERVER_HEADER.UPDATE_HEALTH);
-      stream.writeLEB128(eid);
-      stream.writeU16(newHealth);
-    }
-  }
-
   sendChangeItem(eid: number, newItemId: number) {
     const clients = this.clients.array;
     for (let i = 0; i < clients.length; i++) {
@@ -167,6 +153,14 @@ export default class GameServer {
       stream.writeLEB128(eid);
       stream.writeU16(newItemId);
     }
+  }
+
+  sendHealthFoodHunger(client: Client, health: number, food: number, hunger: number){
+    const stream = client.stream;
+    stream.writeU8(SERVER_HEADER.HEALTH);
+    stream.writeU8(health);
+    stream.writeU8(food);
+    stream.writeU8(hunger);
   }
 
   sendAction(eid: number, actionId: number) {
@@ -206,6 +200,7 @@ export default class GameServer {
   sendInventory(eid: number, client: Client) {
     const stream = client.stream;
     const inventory = C_Inventory.items[eid];
+
 
     const size = inventory.length / 2;
     stream.writeU8(SERVER_HEADER.INVENTORY);

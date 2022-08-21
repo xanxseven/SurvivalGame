@@ -1,6 +1,7 @@
 // lets use a statemachine design for the mob ai
 
 import { types } from "../../../../shared/EntityTypes";
+import { lerpAngle } from "../../../../shared/Utilts";
 import { C_Base, C_Controls, C_Mob, C_Position, C_Rotation } from "../Components";
 import World, { collisionLayer } from "../World";
 
@@ -49,6 +50,7 @@ export function tickPassive(world: World, eid: number, delta: number) {
 
   //console.log(stateToString(state));
 
+
   switch (state) {
     case MOB_STATE.CHASE_ENTITY:
       const target = C_Mob.targetEid[eid]
@@ -78,7 +80,7 @@ export function tickPassive(world: World, eid: number, delta: number) {
 
       C_Controls.x[eid] = dx;
       C_Controls.y[eid] = dy;
-      C_Rotation.rotation[eid] = Math.atan2(dy, dx);
+      C_Mob.targetAngle[eid] = Math.atan2(dy, dx);
       break;
   }
 
@@ -138,7 +140,7 @@ export function tickPassive(world: World, eid: number, delta: number) {
       C_Mob.stateTimer[eid] -= delta;
       if (C_Mob.stateTimer[eid] <= 0) {
         const angle = Math.random() * Math.PI * 2;
-        C_Rotation.rotation[eid] = angle;
+        C_Mob.targetAngle[eid] = angle;
         C_Controls.x[eid] = Math.cos(angle);
         C_Controls.y[eid] = Math.sin(angle);
         C_Controls.vel[eid] = 0.7;
@@ -146,6 +148,8 @@ export function tickPassive(world: World, eid: number, delta: number) {
       }
       break;
   }
+
+  C_Rotation.rotation[eid] = lerpAngle(C_Rotation.rotation[eid], C_Mob.targetAngle[eid], 0.4);
 }
 
 export function tickMob(world: World, eid: number, delta: number) {

@@ -68,8 +68,6 @@ const mouseSystem = (gameWorld: World, world: IWorld) => {
 
       if (!gameWorld.isAttackTimerActive(eid)) {
         if (Math.random() > .5) {
-          gameWorld.changeEntityItem(eid, C_Weilds.itemId[eid] === ITEM.SWORD ? ITEM.FIST : ITEM.SWORD);
-          gameWorld.server.sendChangeItem(eid, C_Weilds.itemId[eid]);
         }
         gameWorld.server.sendAction(eid, Items[C_Weilds.itemId[eid]].anim.use);
         gameWorld.startAttackTimer(eid, 200, 200);
@@ -290,7 +288,15 @@ export default class World {
       this.onEntityDie(target);
     } else {
       C_Health.health[target] = newHealth;
-      this.server.sendHealth(target, newHealth);
+
+      if(hasComponent(this.world, C_ClientHandle, target)) {
+        const clientHandleId = C_ClientHandle.cid[target];
+        if(clientHandleId !== -1){
+          const clientHandle = this.server.clients.find(clientHandleId);
+
+          //this.server.sendHealth(clientHandle, newHealth);
+        }
+      }
     }
 
   }
@@ -378,7 +384,7 @@ export default class World {
       }
 
       const index = low;
-      if (index < MAX) {
+      if (index < MAX - 1 && leaderboard.length < MAX) {
         leaderboard.splice(index, 0, [cid, score]);
       }
     }
@@ -501,7 +507,7 @@ export default class World {
     this.bodyMap.set(eid, body);
 
     C_Health.health[eid] = C_Health.maxHealth[eid] = 100;
-    C_Controls.vel[eid] = .950;
+    C_Controls.vel[eid] = 1.050;
 
     Inventory_addItem(eid, ITEM.SWORD, 10);
     Inventory_addItem(eid, ITEM.SPEAR, 15);
@@ -553,13 +559,13 @@ export default class World {
   //#region Generation of the map
   generateMap() {
     const spread = 5000;
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 0; i++) {
       const tree = this.createTree();
       this.setBodyPosition(tree, Math.random() * spread, Math.random() * spread);
       this.addEntity(tree);
     }
 
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 0; i++) {
       const tree = this.createRock();
       this.setBodyPosition(tree, Math.random() * spread, Math.random() * spread);
       this.addEntity(tree);
@@ -571,7 +577,7 @@ export default class World {
       this.addEntity(tree);
     }
 
-    for (let i = 0; i < 1; i++) {
+    for (let i = 0; i < 0; i++) {
       const wolf = this.createWolf();
       this.setBodyPosition(wolf, Math.random() * 500, Math.random() * 500);
       this.addEntity(wolf);

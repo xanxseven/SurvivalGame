@@ -155,6 +155,8 @@ export class mSprite extends mNode {
     super();
     this.frame = frame;
   }
+
+  onclick: (()=> void) | null = null;
 }
 
 interface ITextOptions {
@@ -214,6 +216,38 @@ export class mText extends mSprite {
     frame.size.y = height;
     frame.texture.srcWidth = width;
     frame.texture.srcHeight = height;
+  }
+}
+
+export class mBufferCanvas extends mSprite {
+  canvas: HTMLCanvasElement;
+  ctx: CanvasRenderingContext2D;
+  options: ITextOptions;
+
+  constructor() {
+    const canvas = document.createElement("canvas");
+    const width = 1;
+    const height = 1;
+    const texture = new mTexture("", new mPoint(width, height), canvas);
+    const frame = texture.frame(new mPoint(), new mPoint(width, height), new mPoint(), new mPoint(1, 1));
+
+    super(frame);
+
+    this.canvas = canvas;
+    this.ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
+
+    this.resize(width, height);
+  }
+
+  resize(width: number, height: number){
+    this.canvas.width = width;
+    this.canvas.height = height;
+    this.frame.size.x = width;
+    this.frame.size.y = height;
+  }
+
+  getCtx(){
+    return this.ctx;
   }
 }
 

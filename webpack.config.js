@@ -34,8 +34,10 @@ const config = {
           options: {
             presets: ['@babel/preset-env', {
               "exclude": ["transform-typeof-symbol"],
-              ///target: ["es2020"],
             }],
+            targets: {
+              chrome: "80"
+            },
             plugins: ['@babel/plugin-transform-runtime']
           }
         }

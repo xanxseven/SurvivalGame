@@ -78,7 +78,7 @@ export function GameClient_init() {
 GameClient_init();
 
 export function GameClient_render() {
-  renderer.clearScreen("#133a2b");
+  renderer.clearScreen("#e8e4e3");
   renderer.render(root);
 
   deactiveVisibleDecorations();
@@ -96,51 +96,33 @@ function pointInSprite(x: number, y: number, sprite: mSprite) {
 }
 
 // @ts-ignore
-const ret: [mNode, number] = [null, 0]
 
-export function mouseVsSprite(x: number, y: number, node: mNode, maxDepth = 1, accumX: number = 0, accumY = 0, currentDepth = 0): [mNode, number] {
+export function mouseVsSprite(x: number, y: number, node: mNode, maxDepth = 1, accumX: number = 0, accumY = 0, currentDepth = 0): boolean {
   accumX += node.position.x;
-  accumY += node.position.y;
+  accumY += node.position.y
 
-  if (currentDepth > maxDepth) {
-    // @ts-ignore
-    ret[0] = null;
-    ret[1] = 0;
-    return ret;
-  };
+  if (currentDepth > maxDepth) return false;
 
   for (let i = 0; i < node.children.length; i++) {
     const child = node.children[i];
     if (!child.visible) continue;
     if (child.isSprite) {
-      if (pointInSprite(x - accumX, y - accumY, child as mSprite)) {
-        ret[0] = child;
-        ret[1] = i;
-        return ret;
+      if ((child as mSprite).onclick && pointInSprite(x - accumX, y - accumY, child as mSprite)) {
+        ((child as mSprite).onclick as any)();
+        return true;
+      } else {
+        if (mouseVsSprite(x, y, child, maxDepth, accumX, accumY, currentDepth + 1)) return true;;
       }
     } else {
-      return mouseVsSprite(x, y, child, maxDepth, accumX, accumY, currentDepth + 1);
+      if (mouseVsSprite(x, y, child, maxDepth, accumX, accumY, currentDepth + 1)) return true;
     }
   }
 
-  // @ts-ignore
-  ret[0] = null;
-  ret[1] = 0;
-  return ret;
+  return false;
 }
 
 export function GameClient_update(now: number, delta: number) {
 
-  /*
-  if(mouseTestHotbar()){
-
-  }
-  */
-
-  const hotbar = mouseVsSprite(mouseX, mouseY, Hotbar_root, 1);
-  if (hotbar[0]) {
-    console.log(hotbar[1]);
-  }
 
   if (isControlsDirty()) {
     const keyState = getKeyState();
@@ -241,14 +223,14 @@ export function gameClient_addEntity(now: number, eid: number, type: number, x: 
 
 export function GameClient_tryHit() {
 }
-
-function mouseToRot(ang: number){
-  return ang;
-}
 export function GameClient_mouseDown() {
-  outStream.writeU8(CLIENT_HEADER.MOUSE_DOWN);
-  outStream.writeF32(getMouseState());
-  flushStream();
+  if (mouseVsSprite(mouseX, mouseY, uiScene, 10)) {
+
+  } else {
+    outStream.writeU8(CLIENT_HEADER.MOUSE_DOWN);
+    outStream.writeF32(getMouseState());
+    flushStream();
+  }
 }
 
 export function GameClient_mouseUp() {
@@ -361,11 +343,7 @@ export function GameClient_unpackInventory() {
 }
 
 export function GameClient_unpackHealth() {
-  const eid = inStream.readULEB128();
   const health = inStream.readU16();
-
-  const entity = GameClient_entities.find(eid);
-  entity.updateHealth(health);
 }
 
 export function GameClient_unpackDied() {

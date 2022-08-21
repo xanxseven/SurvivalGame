@@ -2,6 +2,7 @@ import { SPRITE } from "../../shared/Sprite";
 import { mAtlas, mPoint, mSprite, mTexture } from "./Renderer";
 import itemsJSON from "./atlas/itemAtlas.json";
 import decorationJSON from "./atlas/decorationAtlas.json";
+import uiJSON from "./atlas/uiAtlas.json";
 import playerJSON from "./atlas/playerAtlas.json";
 
 export class Sprite {
@@ -54,6 +55,7 @@ const wolfTexture = new mTexture("img/entity/wolf.png", new mPoint(224, 224));
 const itemAtlas = new mAtlas("img/item/itemAtlas.png", itemsJSON);
 const decorationAtlas = new mAtlas("img/decoration/decorationAtlas.png", decorationJSON);
 const playerAtlas = new mAtlas("img/entity/playerAtlas.png", playerJSON);
+const uiAtlas = new mAtlas("img/ui/uiAtlas.png", uiJSON);
 
 const unitScale = new mPoint(1, 1);
 const halfScale = new mPoint(.5, .5);
@@ -67,7 +69,7 @@ export const Sprites = {
   [SPRITE.PLAYER_ARM_L]: playerAtlas.frame("armr2", halfScale, halfScale),
   [SPRITE.PLAYER_ARM_R]: playerAtlas.frame("arml2", halfScale, halfScale),
   [SPRITE.SWORD]: itemAtlas.frame("hammer_amethyst", originPoint, unitScale),
-  [SPRITE.SPEAR]: itemAtlas.frame("spear_amethyst", originPoint, unitScale),
+  [SPRITE.SPEAR]: itemAtlas.frame("spear_amethyst", originPoint, halfScale),
   [SPRITE.HEALTH_BAR_BAR_BORDER]: healthBarBorder.frame(originPoint, new mPoint(293, 60), new mPoint(293 * .5, 60 * .5), halfScale),
   [SPRITE.HEALTH_BAR_BAR_COLOR]: healthBarFillColor.frame(originPoint, new mPoint(293, 60), new mPoint(293 * 0, 60 * .5), halfScale),
   [SPRITE.HEALTH_BAR_BG_COLOR]: healthBarBgColor.frame(originPoint, new mPoint(293, 60), new mPoint(293 * .5, 60 * .5), halfScale),
@@ -96,6 +98,9 @@ export const Sprites = {
   [SPRITE.GRASS3]: decorationAtlas.frame("grass4", halfScale, halfScale),
   [SPRITE.GRASS4]: decorationAtlas.frame("grass5", halfScale, halfScale),
   [SPRITE.GRASS5]: decorationAtlas.frame("grass6", halfScale, halfScale),
+  [SPRITE.HEALTH_BAR]: uiAtlas.frame("health_bar", halfScale, halfScale),
+  [SPRITE.FOOD_BAR]: uiAtlas.frame("food_bar", halfScale, halfScale),
+  [SPRITE.COLD_BAR]: uiAtlas.frame("cold_bar", halfScale, halfScale),
 };
 
 console.log(Sprites);

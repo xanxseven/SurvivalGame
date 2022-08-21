@@ -13,7 +13,7 @@ export const C_AttackTimer = defineComponent({ attackDelay: Types.f32, attackCoo
 export const C_Health = defineComponent({ health: Types.ui16, maxHealth: Types.ui16 });
 export const C_Mouse = defineComponent({ mouseDown: Types.ui8 });
 export const C_Leaderboard = defineComponent({ score: Types.ui32 });
-export const C_Mob = defineComponent({ state: Types.ui32, isHostile: Types.ui8, timer: Types.f32, stateTimer: Types.f32, targetEid: Types.ui32, });
+export const C_Mob = defineComponent({ state: Types.ui32, isHostile: Types.ui8, timer: Types.f32, stateTimer: Types.f32, targetEid: Types.ui32, targetAngle: Types.f32});
 
 
 export const maxIventorySize = 10;

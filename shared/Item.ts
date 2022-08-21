@@ -55,9 +55,9 @@ Items[ITEM.SPEAR] = {
   meeleRange: 100,
   meeleDamage: 30,
   anim: {
-    idle: ANIMATION.IDLE_FIST,
-    move: ANIMATION.MOVE_FIST,
-    use: ANIMATION.USE_FIST,
+    idle: ANIMATION.IDLE_SWORD,
+    move: ANIMATION.MOVE_SWORD,
+    use: ANIMATION.USE_SWORD,
   }
 }
 

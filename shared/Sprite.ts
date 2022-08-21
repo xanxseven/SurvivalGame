@@ -36,5 +36,8 @@ export const SPRITE = {
   INV_SPEAR_SLOT: 34,
   SPEAR: 35,
   WOLF: 36,
+  HEALTH_BAR: 37,
+  COLD_BAR: 38,
+  FOOD_BAR: 39,
 }
 

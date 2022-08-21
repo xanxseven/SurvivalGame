@@ -2,7 +2,7 @@ import GameServer from "./GameServer";
 import { WebSocket } from "ws";
 import { StreamReader, StreamWriter } from "../../../shared/lib/StreamWriter";
 import { CLIENT_HEADER, SERVER_HEADER } from "../../../shared/headers";
-import { C_Base, C_ClientHandle, C_Controls, C_Health, C_Mouse, C_Position, C_Rotation, C_Weilds } from "../Game/Components";
+import { C_Base, C_ClientHandle, C_Controls, C_Health, C_Inventory, C_Mouse, C_Position, C_Rotation, C_Weilds } from "../Game/Components";
 import { ITEM, Items } from "../../../shared/Item";
 import EntityIdManager from "../../../shared/lib/EntityIDManager";
 import { networkTypes, types } from "../../../shared/EntityTypes";
@@ -12,6 +12,12 @@ import {modulo} from "../../../shared/Utilts";
 const TMP_ENTITY_MANAGER: Map<number, boolean> = new Map();
 
 export class Client {
+
+  hungerStats: number = 0;
+  healthStats: number = 0;
+  coldStats: number = 0;
+  isStatsDirty: boolean = false;
+
   id: number = -1;
   eid: number = -1;
   server: GameServer;
@@ -104,9 +110,9 @@ export class Client {
             stream.writeU16(C_ClientHandle.cid[eid]);
             stream.writeU16(C_Weilds.itemId[eid]);
 
-            stream.writeU8(SERVER_HEADER.UPDATE_HEALTH);
-            stream.writeLEB128(eid);
-            stream.writeU16(C_Health.health[eid]);
+            //stream.writeU8(SERVER_HEADER.UPDATE_HEALTH);
+            //stream.writeLEB128(eid);
+            //stream.writeU16(C_Health.health[eid]);
             break;
         }
 
@@ -144,6 +150,14 @@ export class Client {
         case CLIENT_HEADER.MOUSE_UP: {
           if (this.eid !== -1) C_Mouse.mouseDown[this.eid] = +false;
           break;
+        }
+        case CLIENT_HEADER.INVENTORY: {
+          const slotId = inStream.readU8() * 2;
+          console.log(slotId, "swapping to slot");
+          const eid = this.eid;
+          const itemId = C_Inventory.items[eid][slotId];
+          this.server.world.changeEntityItem(eid, itemId);
+         break; 
         }
         case CLIENT_HEADER.MOUSE_DOWN: {
           const angle = modulo(inStream.readF32(), Math.PI * 2);
