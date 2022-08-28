@@ -3,7 +3,7 @@ import { CLIENT_HEADER } from "../../shared/headers";
 import { ITEM, Items } from "../../shared/Item";
 import ObjectManagerAssigned from "../../shared/lib/ObjectManagerAssignedIds";
 import { SPRITE } from "../../shared/Sprite";
-import { getKeyState, getMouseState, isControlsDirty, mouse, mouseX, mouseY } from "./Controls";
+import { getKeyState, getMouseState, isControlsDirty, mouse, mouseX, mouseY, stopMoving } from "./Controls";
 import { Entity, getSnapShot, storeSnapShot } from "./Entity/Entity";
 import { k2Renderer, k2Scene, k2Sprite, mAtlas, mNode, mPoint, mRenderer, mSprite, mText, mTexture } from "./Renderer";
 import { flushStream, inStream, outStream, requestRespawn } from "./Socket";
@@ -29,7 +29,7 @@ game.add(scene);
 
 export const root = new mNode();
 export const gameWorldScene = new mNode();
-
+export let isChatOpen = false;
 
 export const worldLayer1 = new mNode();
 export const worldLayer2 = new mNode();
@@ -58,24 +58,46 @@ export function repositionUI() {
 }
 
 export function GameClient_init() {
-  const text = new mText("Hello world!", {
-    align: 'left',
-    baseLine: 'top',
-    fill: "red",
-    fontFamily: 'Ariel',
-    fontSize: 100,
-  });
-
   uiScene.add(Leaderboard_sprite);
   uiScene.add(Hotbar_root)
-
-  worldLayer2.add(text);
   repositionUI();
-
   initDecoration();
 }
 
 GameClient_init();
+
+
+export function GameClient_showChat() {
+  (document.getElementById("chat-wrapper") as any).style.display = "block";
+  (document.getElementById("chat") as any).focus();
+  isChatOpen = true;
+}
+
+export function GameClient_hideChat() {
+  (document.getElementById("chat-wrapper") as any).style.display = "none";
+  (document.getElementById("chat") as any).blur();
+  (document.getElementById("chat") as any).value = "";
+  isChatOpen = false;
+}
+
+
+export function GameClient_enterPressed() {
+  const chatWrapper = document.getElementById("chat-wrapper") as any;
+  if (chatWrapper.style.display === "none") {
+    stopMoving();
+    GameClient_showChat();
+  } else {
+
+    const chatValue = (document.getElementById("chat") as any).value;
+    if (chatValue !== "") {
+
+      outStream.writeU8(CLIENT_HEADER.CHAT);
+      outStream.writeString(chatValue);
+      flushStream();
+    }
+    GameClient_hideChat();
+  }
+}
 
 export function GameClient_render() {
   renderer.clearScreen("#e8e4e3");
@@ -253,7 +275,6 @@ export function GameClient_unpackAddEntity(packetArrivalTime: number) {
 
   let entity = gameClient_addEntity(packetArrivalTime, eid, type, x, y, rotation);
 
-  console.log("+", eid);
   // read additional data depending on the entity
   switch (entity.type) {
     case types.PLAYER:
@@ -279,27 +300,23 @@ export function GameClient_unpackUpdateEntity(packetArrivalTime: number) {
 
 export function GameClient_unpackRemoveEntity() {
   const eid = inStream.readULEB128();
-  console.log("-", eid);
   GameClient_removeEntity(eid);
 }
 
 export function GameClient_unpackConfig() {
   const _tickRate = inStream.readU8();
   tickRate = _tickRate;
-  console.log("tickRate, ", _tickRate);
 }
 
 export function GameClient_unpackSetOurEntity() {
   const eid = inStream.readULEB128();
   ourEid = eid;
-  console.log('[Client] got our eid: ' + eid);
 }
 
 export function GameClient_unpackAddClient() {
   const id = inStream.readULEB128();
   const nickname = inStream.readString();
   clientNames.set(id, nickname);
-  console.log(`[Client] new client joined! ${id} ${nickname}`);
 }
 
 export function GameClient_unpackSwapItem() {
@@ -320,6 +337,18 @@ export function GameClient_unpackAction() {
   let entity = GameClient_entities.find(eid);
 
   entity.changeAnimState(action);
+}
+
+export function GameClient_unpackChat() {
+  const eid = inStream.readULEB128();
+  const message = inStream.readString();
+
+  try {
+    let entity = GameClient_entities.find(eid) as HumanEntity;
+    (<HumanEntity>entity).updateChat(message); // do something to the skeleton
+  } catch (e) {
+    console.log("Error, expected humanLike, got something else", e);
+  }
 }
 
 export function GameClient_unpackHitBouceEffect() {

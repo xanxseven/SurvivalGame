@@ -210,4 +210,18 @@ export default class GameServer {
       stream.writeU16(inventory[i + 1]);
     }
   }
+
+  sendChat(eid: number, message: string){
+    const clients = this.clients.array;
+    for (let i = 0; i < clients.length; i++) {
+      const client = clients[i];
+      if (!client.ready) continue;
+      if (!client.visibleEntities.has(eid)) continue;
+
+      const stream = client.stream;
+      stream.writeU8(SERVER_HEADER.CHAT);
+      stream.writeLEB128(eid);
+      stream.writeString(message);
+    }
+  }
 }

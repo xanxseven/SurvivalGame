@@ -102,5 +102,3 @@ export const Sprites = {
   [SPRITE.FOOD_BAR]: uiAtlas.frame("food_bar", halfScale, halfScale),
   [SPRITE.COLD_BAR]: uiAtlas.frame("cold_bar", halfScale, halfScale),
 };
-
-console.log(Sprites);

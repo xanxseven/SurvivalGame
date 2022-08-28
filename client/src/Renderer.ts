@@ -165,6 +165,8 @@ interface ITextOptions {
   align: 'center' | 'left' | 'right';
   baseLine: 'top';
   fill: string;
+  bg?: string;
+  padding?: number;
 }
 
 export class mText extends mSprite {
@@ -182,6 +184,7 @@ export class mText extends mSprite {
     super(frame);
 
     this.options = Object.assign({}, options);
+    this.options.padding = this.options.padding || 0;
     this.canvas = canvas;
     this.ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
 
@@ -198,19 +201,25 @@ export class mText extends mSprite {
 
     const fontStr = `${fontSize}px ${fontFamily}`;
     ctx.font = fontStr;
-    const width = ctx.measureText(text).width || 1;
-    const height = fontSize;
+    const padding = (this.options.padding as number);
+    const width = (ctx.measureText(text).width || 1) + padding * 2;
+    const height = fontSize + padding * 2;
 
     canvas.width = width;
     canvas.height = height;
+
+    if(this.options.bg){
+      ctx.fillStyle = this.options.bg;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
 
     ctx.textBaseline = this.options.baseLine;
     ctx.fillStyle = this.options.fill
     ctx.font = fontStr;
     ctx.textAlign = this.options.align;
 
-    const x = this.options.align === 'right' ? width : 0;
-    ctx.fillText(text, x, 0);
+    const x = this.options.align === 'right' ? width + padding : padding;
+    ctx.fillText(text, x, padding);
 
     frame.size.x = width;
     frame.size.y = height;

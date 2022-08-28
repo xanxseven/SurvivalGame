@@ -99,6 +99,4 @@ export function initDecoration() {
     decorationMap.insert(decoration);
     worldLayer1.add(decoration.sprite);
   }
-
-  console.log(decorationMap);
 }

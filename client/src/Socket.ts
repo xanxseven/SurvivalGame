@@ -1,6 +1,6 @@
 import { CLIENT_HEADER, SERVER_HEADER } from "../../shared/headers";
 import { StreamReader, StreamWriter } from "../../shared/lib/StreamWriter";
-import { GameClient_unpackAction, GameClient_unpackAddClient, GameClient_unpackAddEntity, GameClient_unpackConfig, GameClient_unpackDied, GameClient_unpackHealth, GameClient_unpackHitBouceEffect, GameClient_unpackInventory, GameClient_unpackLeaderboard, GameClient_unpackRemoveEntity, GameClient_unpackSetOurEntity, GameClient_unpackSwapItem, GameClient_unpackUpdateEntity } from "./GameClient";
+import { GameClient_unpackAction, GameClient_unpackAddClient, GameClient_unpackAddEntity, GameClient_unpackChat, GameClient_unpackConfig, GameClient_unpackDied, GameClient_unpackHealth, GameClient_unpackHitBouceEffect, GameClient_unpackInventory, GameClient_unpackLeaderboard, GameClient_unpackRemoveEntity, GameClient_unpackSetOurEntity, GameClient_unpackSwapItem, GameClient_unpackUpdateEntity } from "./GameClient";
 import { evalB64 } from "./AntiBot";
 
 export const outStream = new StreamWriter();
@@ -47,13 +47,10 @@ ws.onmessage = function (data) {
     while (inStream.hasMoreData()) {
       const header = inStream.readU8();
 
-      for (let u in SERVER_HEADER) {
-        if (SERVER_HEADER[u] === header) {
-          console.log(u);
-        }
-      }
-
       switch (header) {
+        case SERVER_HEADER.CHAT:
+          GameClient_unpackChat();
+          break;
         case SERVER_HEADER.ADD_CLIENT:
           GameClient_unpackAddClient();
           break;

@@ -78,7 +78,6 @@ for (let i = 0; i < totalSlots; i++) {
   });
 
   sprite.onclick = () => {
-    console.log(i, "clicked!");
 
     outStream.writeU8(CLIENT_HEADER.INVENTORY);
     outStream.writeU8(i);

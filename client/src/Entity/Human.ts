@@ -31,15 +31,33 @@ export class HumanEntity extends Entity {
     fontSize: 23,
 
   });
+  chatLabel = new mText("Hello world!", {
+    align: 'left',
+    baseLine: 'top',
+    fill: "white",
+    fontFamily: fontName,
+    fontSize: 23,
+    bg: "grey",
+    padding: 5,
+  });
   healthBar = new HealthBar;
   doInterpolation: boolean = true;
   doUpdate: boolean = true;
   activeArm = 0;
+  chatTimer = 3;
 
   updateName(text: string) {
     this.nameLabel.updateText(text);
     this.nameLabel.frame.anchor.x = this.nameLabel.frame.size.x * .5 * this.nameLabel.frame.scale.x;
     this.nameLabel.frame.anchor.y = this.nameLabel.frame.size.y * .5 * this.nameLabel.frame.scale.y;
+  }
+
+  updateChat(text: string) {
+    this.chatTimer = 3;
+    this.chatLabel.visible = true;
+    this.chatLabel.updateText(text);
+    this.chatLabel.frame.anchor.x = this.chatLabel.frame.size.x * .5 * this.chatLabel.frame.scale.x;
+    this.chatLabel.frame.anchor.y = this.chatLabel.frame.size.y * .5 * this.chatLabel.frame.scale.y;
   }
 
   constructor(type: number) {
@@ -56,6 +74,8 @@ export class HumanEntity extends Entity {
     this.item.setDepth(-1);
     this.setItemActive(false);
     this.updateName("playerName");
+    this.updateChat("Test Chat");
+    this.chatLabel.visible = false;
   }
 
   updateHealth(health: number): void {
@@ -71,6 +91,8 @@ export class HumanEntity extends Entity {
     this.healthBar.root.position.y = y + 50;
     this.nameLabel.position.x = x;
     this.nameLabel.position.y = y - 65;
+    this.chatLabel.position.x = x;
+    this.chatLabel.position.y = y - 115;
   }
 
   changeAnimState(newState: number): void {
@@ -84,12 +106,14 @@ export class HumanEntity extends Entity {
     worldLayer1.add(this.root);
     //worldLayer2.add(this.healthBar.root);
     worldLayer2.add(this.nameLabel);
+    worldLayer2.add(this.chatLabel);
   }
 
   removeFromScene() {
     worldLayer1.remove(this.root);
     //worldLayer2.remove(this.healthBar.root);
     worldLayer2.remove(this.nameLabel);
+    worldLayer2.remove(this.chatLabel);
   }
 
   onAnimationOver(): void {
@@ -102,6 +126,15 @@ export class HumanEntity extends Entity {
 
   update(delta: number) {
     this.delta += delta;
+
+    if(this.chatTimer){
+      this.chatTimer -= delta;
+
+      if(this.chatTimer <= 0){
+        this.chatTimer = 0;
+        this.chatLabel.visible = false;
+      }
+    }
 
     if (this.isTransition) {
       this.transition += delta;

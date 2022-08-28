@@ -153,11 +153,16 @@ export class Client {
         }
         case CLIENT_HEADER.INVENTORY: {
           const slotId = inStream.readU8() * 2;
-          console.log(slotId, "swapping to slot");
           const eid = this.eid;
           const itemId = C_Inventory.items[eid][slotId];
           this.server.world.changeEntityItem(eid, itemId);
          break; 
+        }
+        case CLIENT_HEADER.CHAT: {
+          if(!this.ready) return inStream.skipPacket();
+          const message = inStream.readString();
+          this.server.sendChat(this.eid, message);
+          break;
         }
         case CLIENT_HEADER.MOUSE_DOWN: {
           const angle = modulo(inStream.readF32(), Math.PI * 2);
