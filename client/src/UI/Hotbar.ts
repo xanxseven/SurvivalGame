@@ -47,9 +47,9 @@ class Bar {
   }
 }
 
-const coldBar = new Bar(SPRITE.COLD_BAR, "blue");
-const foodBar = new Bar(SPRITE.FOOD_BAR, "red");
-const healthBar = new Bar(SPRITE.HEALTH_BAR, "green");
+export const coldBar = new Bar(SPRITE.COLD_BAR, "blue");
+export const foodBar = new Bar(SPRITE.FOOD_BAR, "red");
+export const healthBar = new Bar(SPRITE.HEALTH_BAR, "green");
 
 root.add(coldBar.root);
 root.add(foodBar.root);

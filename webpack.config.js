@@ -8,7 +8,7 @@ const TerserPlugin = require('terser-webpack-plugin');
 
 dotenv.config();
 
-const isProduction = false;
+const isProduction = true;
 
 const config = {
   target: ["web", "es2020"],
@@ -20,7 +20,17 @@ const config = {
       terserOptions: {
         compress: {
           hoist_funs: false,
-        }
+          passes: 20,
+          ecma: 2020,
+          unsafe: true,
+          toplevel: true,
+        },
+        mangle: {
+          properties: true,
+          reserved: [/meta/, "meta"]
+        },
+        ecma: 2020,
+        toplevel: true,
       }
     })],
   },
@@ -48,7 +58,7 @@ const config = {
     extensions: ['.tsx', '.ts', '.js', 'scss'],
   },
   output: {
-    filename: 'bundle.js',
+    filename: '[contenthash].js',
     path: path.resolve(__dirname, 'client/build'),
   },
   plugins: [

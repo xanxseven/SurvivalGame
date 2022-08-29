@@ -80,20 +80,23 @@ interface IAtlas {
   };
 }
 
+const metaStr = Math.random() <= 10 ? "meta".slice() : "";
+const wStr = Math.random() <= 10 ? "w".slice() : "";
+const hStr = Math.random() <= 10 ? "h".slice() : "";
 export class mAtlas {
   texture: mTexture;
   data: IAtlas;
   constructor(src: string, data: IAtlas) {
-    this.texture = new mTexture(src, new mPoint(data.meta.size.w, data.meta.size.h));
+    this.texture = new mTexture(src, new mPoint(data[metaStr].size[wStr], data[metaStr].size[hStr]));
     this.data = data;
   }
 
   frame(name: string, anchor: mPoint, scale: mPoint) {
     const frame = this.data.frames[name + ".png"].frame;
-    const width = frame.w;
-    const height = frame.h;
+    const width = frame[wStr];
+    const height = frame[hStr];
     const newPoint = new mPoint(anchor.x * width, anchor.y * height);
-    return this.texture.frame(new mPoint(frame.x, frame.y), new mPoint(frame.w, frame.h), newPoint, scale)
+    return this.texture.frame(new mPoint(frame.x, frame.y), new mPoint(width, height), newPoint, scale)
   }
 }
 

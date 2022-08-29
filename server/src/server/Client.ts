@@ -215,6 +215,8 @@ export class Client {
 
   onRequestSpawn() {
     if (this.server.world.isEntityActive(this.eid)) return;
+    const nickname = this.inStream.readString();
+    this.nickname = nickname;
 
     resetHealth(this.eid);
     this.server.world.addEntity(this.eid);

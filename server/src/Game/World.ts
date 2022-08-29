@@ -21,7 +21,7 @@ export const collisionLayer = {
 
 import EntityIdManager from "../../../shared/lib/EntityIDManager";
 import GameServer from "../server/GameServer";
-import { C_AttackTimer, C_Base, C_Body, C_ClientHandle, C_Controls, C_Health, C_HitBouceEffect, C_Inventory, C_Leaderboard, C_Mob, C_Mouse, C_Position, C_Rotation, C_Weilds } from "./Components";
+import { C_AttackTimer, C_Base, C_Body, C_ClientHandle, C_Controls, C_GivesScore, C_Health, C_HitBouceEffect, C_Inventory, C_Leaderboard, C_Mob, C_Mouse, C_Position, C_Rotation, C_Weilds } from "./Components";
 import { networkTypes, types } from "../../../shared/EntityTypes";
 import { k2CreateWorld, k2AddBody, k2StepWorld, k2RemoveBody, k2AABB } from "../Physics/index";
 import k2Body, { k2BodyType } from '../Physics/Body/Body';
@@ -256,9 +256,9 @@ export default class World {
   //#endregion
 
   get_angle_difference(a0: number, a1: number) {
-    var max = Math.PI*2;
+    var max = Math.PI * 2;
     var da = (a1 - a0) % max;
-    return Math.abs(2*da % max - da);
+    return Math.abs(2 * da % max - da);
   }
 
   queryRect(minx: number, miny: number, maxx: number, maxy: number, mask = 0xffff) {
@@ -275,6 +275,12 @@ export default class World {
     this.removeEntity(eid);
   }
 
+  onEntityKilled(target: number, killer: number) {
+    if (hasComponent(this.world, C_Leaderboard, killer) && hasComponent(this.world, C_GivesScore, target)) {
+      C_Leaderboard.score[killer] += C_GivesScore.deathScore[target];
+    }
+  }
+
   damage(dealer: number, target: number, damage: number) {
     if (target === -1) throw Error("Invalid eid");
 
@@ -285,16 +291,16 @@ export default class World {
 
     if (newHealth <= 0) {
       C_Health.health[target] = 0;
+      if (dealer !== -1) this.onEntityKilled(target, dealer);
       this.onEntityDie(target);
     } else {
       C_Health.health[target] = newHealth;
 
-      if(hasComponent(this.world, C_ClientHandle, target)) {
+      if (hasComponent(this.world, C_ClientHandle, target)) {
         const clientHandleId = C_ClientHandle.cid[target];
-        if(clientHandleId !== -1){
+        if (clientHandleId !== -1) {
           const clientHandle = this.server.clients.find(clientHandleId);
-
-          //this.server.sendHealth(clientHandle, newHealth);
+          this.server.sendHealthFoodHunger(clientHandle, newHealth, 0, 0);
         }
       }
     }
@@ -358,8 +364,8 @@ export default class World {
         this.damage(dealer, targetEid, 40);
       }
 
-      if (hasComponent(this.world, C_Leaderboard, dealer)) {
-        C_Leaderboard.score[dealer] += 1;
+      if (dealer !== -1 && hasComponent(this.world, C_Leaderboard, dealer) && hasComponent(this.world, C_GivesScore, targetEid)) {
+        C_Leaderboard.score[dealer] += C_GivesScore.hitScore[targetEid];
       }
     }
   }
@@ -371,6 +377,9 @@ export default class World {
 
     for (let i = 0; i < eids.length; i++) {
       const eid = eids[i];
+
+      if(!C_Base.active[eid]) continue;
+
       const score = C_Leaderboard.score[eid];
       const cid = C_ClientHandle.cid[eid];
 
@@ -491,11 +500,14 @@ export default class World {
     addComponent(this.world, C_Health, eid, true);
     addComponent(this.world, C_Mouse, eid, true);
     addComponent(this.world, C_Leaderboard, eid, true);
+    addComponent(this.world, C_GivesScore, eid, true);
 
     if (clientId !== -1) {
       addComponent(this.world, C_ClientHandle, eid, true);
       C_ClientHandle.cid[eid] = clientId;
     }
+
+    C_GivesScore.deathScore[eid] = 1;
 
     const body = new k2Circle(0, 0, 50);
     body.categoryBits = collisionLayer.MOB;
@@ -506,11 +518,13 @@ export default class World {
 
     this.bodyMap.set(eid, body);
 
+    body.position[0] = 1000 + (Math.random() * 1000 - 500);
+    body.position[1] = 1000 + (Math.random() * 1000 - 500);
+
     C_Health.health[eid] = C_Health.maxHealth[eid] = 100;
     C_Controls.vel[eid] = 1.050;
 
-    Inventory_addItem(eid, ITEM.SWORD, 10);
-    Inventory_addItem(eid, ITEM.SPEAR, 15);
+    Inventory_addItem(eid, ITEM.SWORD, 1);
     return eid;
   }
 

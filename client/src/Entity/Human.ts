@@ -20,8 +20,6 @@ export class HumanEntity extends Entity {
   body = new mAnimatedSprite(Sprites[SPRITE.PLAYER]);
   leftArm = new mAnimatedSprite(Sprites[SPRITE.PLAYER_ARM_L]);
   rightArm = new mAnimatedSprite(Sprites[SPRITE.PLAYER_ARM_R]);
-  rightFoot = new mAnimatedSprite(Sprites[SPRITE.FOOT_R]);
-  leftFoot = new mAnimatedSprite(Sprites[SPRITE.FOOT_L]);
   item = new mAnimatedSprite(Sprites[SPRITE.SWORD]);
   nameLabel = new mText("Hello world!", {
     align: 'left',
@@ -63,8 +61,6 @@ export class HumanEntity extends Entity {
   constructor(type: number) {
     super(type);
 
-    this.root.add(this.leftFoot);
-    this.root.add(this.rightFoot);
     this.root.add(this.body);
     this.root.add(this.item);
     this.root.add(this.leftArm);
@@ -149,8 +145,6 @@ export class HumanEntity extends Entity {
         case ANIMATION.IDLE_FIST:
           computeAndApplyAnimationTransition(this.rightArm, humanIdleHandR, this.delta, t);
           computeAndApplyAnimationTransition(this.leftArm, humanIdleHandL, this.delta, t);
-          this.leftFoot.position.y = 0;
-          this.rightFoot.position.y = 0;
           break;
         case ANIMATION.USE_FIST:
           if (this.activeArm) {
@@ -160,14 +154,10 @@ export class HumanEntity extends Entity {
             computeAndApplyAnimationTransition(this.rightArm, humanUseHandR, this.delta, t);
             computeAndApplyAnimationTransition(this.leftArm, humanIdleHandL, this.delta, t);
           }
-          this.leftFoot.position.y = 0;
-          this.rightFoot.position.y = 0;
           break;
         case ANIMATION.MOVE_FIST:
           computeAndApplyAnimationTransition(this.rightArm, humanMoveHandR, this.delta, t);
           computeAndApplyAnimationTransition(this.leftArm, humanMoveHandL, this.delta, t);
-          computeAndApplyAnimationTransition(this.rightFoot, humanMoveFootR, this.delta, t);
-          computeAndApplyAnimationTransition(this.leftFoot, humanMoveFootL, this.delta, t);
           break;
         case ANIMATION.IDLE_SWORD: {
           computeAndApplyAnimationTransition(this.rightArm, humanIdleHandR, this.delta, t);
@@ -175,16 +165,12 @@ export class HumanEntity extends Entity {
           computeAndApplyAnimationTransition(this.item, humanIdleSword, this.delta, t);
           this.item.position.x = this.leftArm.position.x;
           this.item.position.y = this.leftArm.position.y;
-          this.leftFoot.position.y = 0;
-          this.rightFoot.position.y = 0;
           break;
         }
         case ANIMATION.MOVE_SWORD: {
           computeAndApplyAnimationTransition(this.rightArm, humanMoveHandR, this.delta, t);
           computeAndApplyAnimationTransition(this.leftArm, humanMoveHandL, this.delta, t);
           computeAndApplyAnimationTransition(this.item, humanIdleSword, this.delta, t);
-          computeAndApplyAnimationTransition(this.rightFoot, humanMoveFootR, this.delta, t);
-          computeAndApplyAnimationTransition(this.leftFoot, humanMoveFootL, this.delta, t);
           this.item.position.x = this.leftArm.position.x;
           this.item.position.y = this.leftArm.position.y;
           break;
@@ -195,8 +181,6 @@ export class HumanEntity extends Entity {
           computeAndApplyAnimationTransition(this.item, humanIdleSword, this.delta, t);
           this.item.position.x = this.leftArm.position.x;
           this.item.position.y = this.leftArm.position.y;
-          this.leftFoot.position.y = 0;
-          this.rightFoot.position.y = 0;
           break;
         }
       }
@@ -205,14 +189,10 @@ export class HumanEntity extends Entity {
         case ANIMATION.IDLE_FIST:
           computeAndApplyAnimation(this.leftArm, humanIdleHandL, this.delta);
           computeAndApplyAnimation(this.rightArm, humanIdleHandR, this.delta);
-          this.leftFoot.position.y = 0;
-          this.rightFoot.position.y = 0;
           break;
         case ANIMATION.MOVE_FIST:
           computeAndApplyAnimation(this.rightArm, humanMoveHandR, this.delta);
           computeAndApplyAnimation(this.leftArm, humanMoveHandL, this.delta);
-          computeAndApplyAnimation(this.rightFoot, humanMoveFootR, this.delta);
-          computeAndApplyAnimation(this.leftFoot, humanMoveFootL, this.delta);
           break;
         case ANIMATION.USE_FIST:
           if (this.activeArm) {
@@ -222,8 +202,6 @@ export class HumanEntity extends Entity {
             computeAndApplyAnimation(this.rightArm, humanUseHandR, this.delta);
             computeAndApplyAnimation(this.leftArm, humanIdleHandL, this.delta);
           }
-          this.leftFoot.position.y = 0;
-          this.rightFoot.position.y = 0;
           break;
         case ANIMATION.IDLE_SWORD: {
           computeAndApplyAnimation(this.rightArm, humanIdleHandR, this.delta);
@@ -231,16 +209,12 @@ export class HumanEntity extends Entity {
           computeAndApplyAnimation(this.item, humanIdleSword, this.delta);
           this.item.position.x = this.leftArm.position.x;
           this.item.position.y = this.leftArm.position.y;
-          this.leftFoot.position.y = 0;
-          this.rightFoot.position.y = 0;
           break;
         }
         case ANIMATION.MOVE_SWORD: {
           computeAndApplyAnimation(this.rightArm, humanMoveHandR, this.delta);
           computeAndApplyAnimation(this.leftArm, humanMoveHandL, this.delta);
           computeAndApplyAnimation(this.item, humanIdleSword, this.delta);
-          computeAndApplyAnimation(this.rightFoot, humanMoveFootR, this.delta);
-          computeAndApplyAnimation(this.leftFoot, humanMoveFootL, this.delta);
           this.item.position.x = this.leftArm.position.x;
           this.item.position.y = this.leftArm.position.y;
           break;
@@ -251,8 +225,6 @@ export class HumanEntity extends Entity {
           computeAndApplyAnimation(this.item, humanIdleSword, this.delta);
           this.item.position.x = this.leftArm.position.x;
           this.item.position.y = this.leftArm.position.y;
-          this.leftFoot.position.y = 0;
-          this.rightFoot.position.y = 0;
           break;
         }
       }
@@ -263,8 +235,6 @@ export class HumanEntity extends Entity {
     this.rightArm.saveState();
     this.item.saveState();
     this.body.saveState();
-    this.leftFoot.saveState();
-    this.rightFoot.saveState();
 
     if (this.delta > animationDurations[this.animationState] * 2) this.onAnimationOver();
   };

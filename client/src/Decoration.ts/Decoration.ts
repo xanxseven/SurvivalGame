@@ -82,12 +82,6 @@ const decorationSprites = [
   SPRITE.FLOWER8,
   SPRITE.FLOWER9,
   SPRITE.FLOWER10,
-  SPRITE.GRASS0,
-  SPRITE.GRASS1,
-  SPRITE.GRASS2,
-  SPRITE.GRASS3,
-  SPRITE.GRASS4,
-  SPRITE.GRASS5,
 ]
 
 export function initDecoration() {

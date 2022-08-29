@@ -12,7 +12,7 @@ import { lerpAngle } from "../../shared/Utilts";
 import { HumanEntity } from "./Entity/Human";
 import { HitAnimatedEntity, TreeEntity } from "./Entity/Tree";
 import { Leaderboard_maxSize, Leaderboard_reposition, Leaderboard_showValue, Leaderboard_sprite, Leaderboard_updateValue } from "./UI/Leaderboard";
-import { Hotbar_reposition, Hotbar_root, Hotbar_updateSlot } from "./UI/Hotbar";
+import { healthBar, Hotbar_reposition, Hotbar_root, Hotbar_updateSlot } from "./UI/Hotbar";
 import { RockEntity } from "./Entity/Rock";
 import { activeVisibleDecorations, deactiveVisibleDecorations, initDecoration } from "./Decoration.ts/Decoration";
 import { MobEntity } from "./Entity/MobEntity";
@@ -50,6 +50,14 @@ root.add(uiScene);
 export function GameClient_resize() {
   renderer.resize(window.innerWidth, window.innerHeight);
   repositionUI();
+}
+
+export function GameClient_hideMenu(){
+  (document.getElementById("homepage") as any).style.display = "none";
+}
+
+export function Gameclient_showMenu(){
+  (document.getElementById("homepage") as any).style.display = "block";
 }
 
 export function repositionUI() {
@@ -311,6 +319,7 @@ export function GameClient_unpackConfig() {
 export function GameClient_unpackSetOurEntity() {
   const eid = inStream.readULEB128();
   ourEid = eid;
+  GameClient_hideMenu();
 }
 
 export function GameClient_unpackAddClient() {
@@ -373,10 +382,14 @@ export function GameClient_unpackInventory() {
 
 export function GameClient_unpackHealth() {
   const health = inStream.readU16();
+  const food = inStream.readU16();
+  const hunger = inStream.readU16();
+
+  healthBar.setFill(health / 100);
 }
 
 export function GameClient_unpackDied() {
-  requestRespawn();
+  Gameclient_showMenu();
 }
 
 export function GameClient_unpackLeaderboard() {

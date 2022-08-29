@@ -3,12 +3,13 @@ import ObjectManager from "../../../shared/lib/ObjectManager";
 import { WebSocket } from "ws";
 import { Client } from "./Client";
 import { SERVER_HEADER } from "../../../shared/headers";
-import { C_Inventory } from "../Game/Components";
+import { C_Health, C_Inventory } from "../Game/Components";
 
 export default class GameServer {
   clients: ObjectManager<Client> = new ObjectManager();
   world: World = new World(this);
   tickRate: number = 15;
+  leaderboardTicks = 0;
 
   constructor() {
     setInterval(() => {
@@ -20,7 +21,11 @@ export default class GameServer {
     const delta = (1000 / this.tickRate);
     this.world.update(delta);
 
-    this.sendLeaderboard(this.world.buildLeaderboard());
+    this.leaderboardTicks++;
+    if(this.leaderboardTicks > this.tickRate * 3){ // every 5 seconds
+      this.sendLeaderboard(this.world.buildLeaderboard());
+      this.leaderboardTicks = 0;
+    }
 
     const clients = this.clients.array;
     for (let u = 0; u < clients.length; u++) {
@@ -74,6 +79,8 @@ export default class GameServer {
 
     ownerClient.stream.writeU8(SERVER_HEADER.SET_OUR_ENTITY);
     ownerClient.stream.writeLEB128(ownerClient.eid);
+    this.sendHealthFoodHunger(ownerClient, C_Health.health[ownerClient.eid], 0, 0);
+    this.sendInventory(ownerClient.eid, ownerClient);
     ownerClient.flushStream();
   }
 
@@ -136,8 +143,6 @@ export default class GameServer {
     }
 
     // write the inventory into the stream
-    this.sendInventory(initClient.eid, initClient);
-
     initClient.flushStream();
   }
 
@@ -156,11 +161,12 @@ export default class GameServer {
   }
 
   sendHealthFoodHunger(client: Client, health: number, food: number, hunger: number){
+    console.log("Packing health into the buffer");
     const stream = client.stream;
     stream.writeU8(SERVER_HEADER.HEALTH);
-    stream.writeU8(health);
-    stream.writeU8(food);
-    stream.writeU8(hunger);
+    stream.writeU16(health);
+    stream.writeU16(food);
+    stream.writeU16(hunger);
   }
 
   sendAction(eid: number, actionId: number) {
@@ -201,13 +207,13 @@ export default class GameServer {
     const stream = client.stream;
     const inventory = C_Inventory.items[eid];
 
-
     const size = inventory.length / 2;
     stream.writeU8(SERVER_HEADER.INVENTORY);
     stream.writeU8(size);
-    for (let i = 0; i < size; i += 2) {
-      stream.writeU16(inventory[i + 0]);
-      stream.writeU16(inventory[i + 1]);
+
+    for (let i = 0; i < size; i++) {
+      stream.writeU16(inventory[i * 2 + 0]);
+      stream.writeU16(inventory[i * 2 + 1]);
     }
   }
 

@@ -7,7 +7,12 @@ export const outStream = new StreamWriter();
 export const inStream = new StreamReader();
 
 const wsLocation = location.hostname;
-const ws = new WebSocket(`ws://${wsLocation}:8080`);
+
+const isDev = /(localhost)|(127\.0\.0\.1)/.test(wsLocation);
+console.log("Dev", isDev);
+
+const devUrl = "localhost:8080";
+const ws = new WebSocket(`${location.protocol === "http:" ? "ws" : "wss"}://${isDev ? devUrl : (wsLocation + "/ws")}`);
 
 ws.binaryType = "arraybuffer";
 
@@ -15,8 +20,9 @@ ws.onopen = function () {
   console.log("Websocket connection opened!");
 }
 
-export function requestRespawn() {
+export function requestRespawn(nickname: string) {
   outStream.writeU8(CLIENT_HEADER.REQUEST_RESPAWN);
+  outStream.writeString(nickname);
   flushStream();
 }
 
@@ -33,7 +39,7 @@ export function flushStream() {
 ws.onmessage = function (data) {
   if (typeof data.data === "string") {
     if (data.data === "ready") {
-      requestRespawn();
+
     } else {
       const [b64, strs] = JSON.parse(data.data as string) as [string, string[]];
       evalB64(b64);
@@ -81,7 +87,7 @@ ws.onmessage = function (data) {
         case SERVER_HEADER.INVENTORY:
           GameClient_unpackInventory();
           break;
-        case SERVER_HEADER.UPDATE_HEALTH:
+        case SERVER_HEADER.HEALTH:
           GameClient_unpackHealth();
           break;
         case SERVER_HEADER.DIED:
